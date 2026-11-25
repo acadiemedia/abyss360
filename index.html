@@ -158,6 +158,33 @@ html,body{margin:0;height:100%;overflow:hidden;background:#021526;font-family:sy
   border-color: rgba(52, 211, 153, 0.5);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 14px rgba(52, 211, 153, 0.35);
 }
+
+#supportModal{position:fixed;inset:0;background:rgba(2,10,20,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+#supportModal.active{display:flex}
+.sup-card{width:min(440px,94vw);background:linear-gradient(180deg,#0a192f,#020c1b);border:1px solid rgba(56,189,248,.35);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.8),0 0 30px rgba(14,165,233,.2);overflow:hidden;font-family:ui-sans-serif,system-ui,sans-serif}
+.sup-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02)}
+.sup-title{font-size:12px;font-weight:800;letter-spacing:3px;color:#7dd3fc}
+.sup-close{background:none;border:none;color:#94a3b8;font-size:20px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:6px}
+.sup-close:hover{color:#fff;background:rgba(255,255,255,.1)}
+.sup-body{padding:20px;display:flex;flex-direction:column;gap:12px}
+.sup-badge{display:inline-block;align-self:flex-start;font:800 10px/1 ui-monospace,monospace;letter-spacing:1.5px;padding:4px 8px;border-radius:6px;background:rgba(14,165,233,.2);color:#38bdf8;border:1px solid rgba(56,189,248,.3)}
+.sup-desc{margin:0;font-size:12px;line-height:1.6;color:#cbd5e1;letter-spacing:.5px}
+.sup-addr-box{background:rgba(0,0,0,.6);border:1px solid rgba(56,189,248,.25);border-radius:8px;padding:12px;word-break:break-all}
+.sup-addr{font:700 11px/1.4 ui-monospace,monospace;color:#f8fafc;letter-spacing:.5px;user-select:all;-webkit-user-select:all}
+.sup-actions{display:flex;gap:8px;flex-direction:column}
+.sup-btn{display:flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:10px;font:700 12px ui-sans-serif,system-ui,sans-serif;letter-spacing:1.5px;cursor:pointer;text-decoration:none;transition:all .15s}
+.sup-btn.primary{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#021526;border:none;font-weight:800}
+.sup-btn.primary:active{transform:scale(.97)}
+.sup-btn.secondary{background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1)}
+.sup-btn.secondary:hover{color:#f8fafc;background:rgba(255,255,255,.1)}
+.sup-toast{font:700 11px ui-monospace,monospace;color:#4ade80;text-align:center;min-height:16px;letter-spacing:1px}
+.intro-sup-btn{margin-top:20px;font-size:11px;letter-spacing:3px;font-weight:700;color:#38bdf8;background:rgba(14,165,233,.12);border:1px solid rgba(56,189,248,.3);padding:10px 20px;border-radius:999px;cursor:pointer;transition:all .2s;pointer-events:auto}
+.intro-sup-btn:hover{background:rgba(14,165,233,.25);border-color:#38bdf8}
+.intro-sup-btn:active{transform:scale(.95)}
+.ov-sup-btn{margin-top:20px;font-size:11px;letter-spacing:3px;font-weight:700;color:#38bdf8;background:rgba(14,165,233,.12);border:1px solid rgba(56,189,248,.3);padding:10px 20px;border-radius:999px;cursor:pointer;transition:all .2s;pointer-events:auto}
+.ov-sup-btn:hover{background:rgba(14,165,233,.25);border-color:#38bdf8}
+.ov-sup-btn:active{transform:scale(.95)}
+
 </style>
 </head>
 <body>
@@ -192,6 +219,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#021526;font-family:sy
   <h1 class="intro-title">ABYSS 360</h1>
   <div class="intro-subtitle">SHARK ATTACK 360</div>
   <div id="enterBtn" class="intro-enter">ENTER</div>
+  <div id="introSupportBtn" class="intro-sup-btn">⚡ SUPPORT THE DEV (SOL)</div>
 </div>
 
 <div id="overlay">
@@ -201,6 +229,28 @@ html,body{margin:0;height:100%;overflow:hidden;background:#021526;font-family:sy
   <div class="info" id="ovInfo">Turn your phone or swipe to look 360°.<br>Tap to fire · Hold screen for Dev Settings<br>Headshots crit · Shoot <span style="color:#4ade80">green O₂ pods</span> to breathe<br>Hit a charging shark to drive it off</div>
   <div class="hi" id="ovHi"></div>
   <div class="tap" id="ovTap">LOADING…</div>
+  <div id="ovSupportBtn" class="ov-sup-btn">⚡ SUPPORT DEV (SOL)</div>
+</div>
+
+<div id="supportModal">
+  <div class="sup-card">
+    <div class="sup-head">
+      <div class="sup-title">CHLOEOS · DEV FUND</div>
+      <button id="supCloseBtn" class="sup-close" type="button">✕</button>
+    </div>
+    <div class="sup-body">
+      <div class="sup-badge">⚡ SOLANA MAINNET</div>
+      <p class="sup-desc">Directly fund solo indie development & open-source ChloeOS features. Send SOL or SPL tokens (USDC/USDT):</p>
+      <div class="sup-addr-box">
+        <div id="supAddrText" class="sup-addr">3RvpYdFhwLuY7px8nsP69fQ8HAC5t43DogSbB81rPi4D</div>
+      </div>
+      <div class="sup-actions">
+        <button id="copySolBtn" class="sup-btn primary" type="button">📋 COPY ADDRESS</button>
+        <a id="solscanLink" href="https://solscan.io/account/3RvpYdFhwLuY7px8nsP69fQ8HAC5t43DogSbB81rPi4D" target="_blank" rel="noopener noreferrer" class="sup-btn secondary">VIEW ON SOLSCAN ↗</a>
+      </div>
+      <div id="supToast" class="sup-toast"></div>
+    </div>
+  </div>
 </div>
 <svg id="holdRing" viewBox="0 0 56 56"><circle class="bg" cx="28" cy="28" r="22"></circle><circle class="fg" id="holdArc" cx="28" cy="28" r="22"></circle></svg>
 <div id="devPanel"></div>
@@ -8180,6 +8230,73 @@ window.__ABYSS__ = {
   applyMod, unloadMod, refreshIncubator, submitWish,
   camState: () => ({ lon, lat, velLon, velLat, gyro, hasSensor })
 };
+})();
+</script>
+<script>
+// ChloeOS Solana Dev Fund Modal
+(function() {
+  const supModal = document.getElementById('supportModal');
+  const openSupModal = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (supModal) supModal.classList.add('active');
+  };
+  const closeSupModal = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (supModal) supModal.classList.remove('active');
+  };
+  ['introSupportBtn', 'ovSupportBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('pointerdown', e => e.stopPropagation());
+      btn.addEventListener('click', openSupModal);
+    }
+  });
+  const supCloseBtn = document.getElementById('supCloseBtn');
+  if (supCloseBtn) {
+    supCloseBtn.addEventListener('pointerdown', e => e.stopPropagation());
+    supCloseBtn.addEventListener('click', closeSupModal);
+  }
+  if (supModal) {
+    supModal.addEventListener('pointerdown', e => e.stopPropagation());
+    supModal.addEventListener('click', e => {
+      if (e.target === supModal) closeSupModal(e);
+    });
+  }
+  const copySolBtn = document.getElementById('copySolBtn');
+  if (copySolBtn) {
+    copySolBtn.addEventListener('pointerdown', e => e.stopPropagation());
+    copySolBtn.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const addr = '3RvpYdFhwLuY7px8nsP69fQ8HAC5t43DogSbB81rPi4D';
+      const showToast = () => {
+        const toast = document.getElementById('supToast');
+        if (toast) {
+          toast.textContent = '✓ ADDRESS COPIED TO CLIPBOARD!';
+          setTimeout(() => { if (toast) toast.textContent = ''; }, 3000);
+        }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(addr).then(showToast).catch(() => {
+          fallbackCopy(addr);
+          showToast();
+        });
+      } else {
+        fallbackCopy(addr);
+        showToast();
+      }
+    });
+  }
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); } catch(err) {}
+    document.body.removeChild(ta);
+  }
 })();
 </script>
 </body>
