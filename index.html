@@ -6949,6 +6949,12 @@ const SCHEMA = {
     ['FPS Telemetry HUD', 'showFps', 'bool']
   ]
 };
+const isLocalHost = typeof location !== 'undefined' && (
+  location.hostname === 'localhost' ||
+  location.hostname === '127.0.0.1' ||
+  location.hostname.startsWith('192.168.') ||
+  location.hostname.startsWith('100.')
+);
 const devPanel = $('devPanel');
 let activeTab = 'WEAPONS', activePreset = 'DEFAULT', uiRefs = {};
 
@@ -7215,7 +7221,7 @@ let incModels = [{ backend: 'opencode', id: 'opencode/deepseek-v4.1-flash-free',
 let incForks = [], incPending = {}, incPollTimer = null, standbyReady = null, incListEl = null, incSelEl = null, incFlashTimer = 0;
 
 function updateIncHud(msg, cls) {
-  if (!incHudEl) return;
+  if (!incHudEl || !isLocalHost) return;
   if (msg) {
     incHudEl.textContent = msg;
     incHudEl.className = cls || '';
@@ -7258,7 +7264,7 @@ if (incHudEl) {
 }
 
 function ensureIncPoll() {
-  if (incPollTimer) return;
+  if (incPollTimer || !isLocalHost) return;
   incPollTimer = setInterval(async () => {
     const ids = Object.keys(incPending);
     if (!ids.length) {
@@ -7309,7 +7315,7 @@ function syncIncModelSelect() {
 }
 
 async function refreshIncubator(fetchModels) {
-  if (typeof fetch !== 'function' || (typeof location !== 'undefined' && location.protocol === 'file:')) return;
+  if (typeof fetch !== 'function' || !isLocalHost) return;
   try {
     if (fetchModels || incModels.length <= 1) {
       const hr = await fetch('/api/incubator/health');
@@ -7912,6 +7918,7 @@ function buildDevPanel() {
 
   const tabs = mk('div', 'tabs');
   for (const tabName in SCHEMA) {
+    if (tabName === 'INCUBATOR' && !isLocalHost) continue;
     const t = mk('button', 'tab', tabName);
     t.addEventListener('click', () => { activeTab = tabName; renderDevTab(); });
     tabs.appendChild(t);
@@ -7952,6 +7959,7 @@ function openSettings() {
   if (S.paused) return;
   S.paused = true;
   down = false; cancelHold();
+  if (activeTab === 'INCUBATOR' && !isLocalHost) activeTab = 'WEAPONS';
   renderDevTab();
   if (devPanel) devPanel.style.display = 'flex';
 }
