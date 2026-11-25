@@ -10,6 +10,14 @@ A self-contained first-person 360° underwater shark shooter. One `index.html` h
 
 The game works from `file://`. The Incubator tab is the exception: it calls same-origin `/api/incubator/*` endpoints and is disabled on `file://`.
 
+## Support & Donate (Solana)
+
+If you enjoy **ChloeOS (ABYSS 360)** or use this code in your projects, consider dropping a tip to support solo indie game engineering and open-source development:
+
+- **Network**: Solana Mainnet (SOL / USDC / SPL Tokens)
+- **Address**: `3RvpYdFhwLuY7px8nsP69fQ8HAC5t43DogSbB81rPi4D`
+- **Solscan**: [View on Solscan](https://solscan.io/account/3RvpYdFhwLuY7px8nsP69fQ8HAC5t43DogSbB81rPi4D)
+
 ## What is inside
 
 - 360° look with gyroscope/drag fallback.
