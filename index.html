@@ -6739,20 +6739,20 @@ function onSensor(e, name) {
 let sensorsOn = false;
 function startSensors() {
   if (sensorsOn) return;
-  sensorsOn = true;
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     DeviceOrientationEvent.requestPermission().then(st => {
       if (st === 'granted') {
+        sensorsOn = true;
         window.addEventListener('deviceorientationabsolute', e => onSensor(e, 'abs'), true);
         window.addEventListener('deviceorientation', e => onSensor(e, 'rel'), true);
       }
     }).catch(() => {});
   } else {
+    sensorsOn = true;
     window.addEventListener('deviceorientationabsolute', e => onSensor(e, 'abs'), true);
     window.addEventListener('deviceorientation', e => onSensor(e, 'rel'), true);
   }
 }
-startSensors();
 window.addEventListener('touchend', () => { if (!sensorsOn || !hasSensor) startSensors(); }, { passive: true });
 
 function updateCamera(dt) {
@@ -8032,6 +8032,7 @@ if (introScreen) {
   const dismissIntro = () => {
     goFullscreen();
     try { initAudio(); } catch (err) {}
+    try { startSensors(); } catch (err) {}
     if (introScreen.classList.contains('fade-out')) return;
     introScreen.classList.add('fade-out');
     setTimeout(() => {
