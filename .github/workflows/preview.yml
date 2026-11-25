@@ -1,0 +1,110 @@
+name: ChloeOS (ABYSS 360) Pages Preview
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chloeos-abyss360-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      REPO: ${{ github.repository }}
+      SERVER: ${{ github.server_url }}
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REF_NAME: ${{ github.ref_name }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      COMMIT_SHA: ${{ github.sha }}
+    steps:
+      - name: Publish ChloeOS static game to gh-pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global user.name "ChloeOS Pages Bot"
+          git config --global user.email "chloeos-pages@users.noreply.github.com"
+
+          work="$(mktemp -d)"
+          src="$work/src"
+          pages="$work/pages"
+          site="$work/site"
+          trap 'rm -rf "$work"' EXIT
+
+          git clone --quiet "https://x-access-token:${TOKEN}@github.com/${REPO}.git" "$src"
+          git -C "$src" fetch --quiet origin "+refs/heads/*:refs/remotes/origin/*"
+          mkdir -p "$site"
+          git -C "$src" archive "$COMMIT_SHA" | tar -x -C "$site"
+
+          git clone --quiet "https://x-access-token:${TOKEN}@github.com/${REPO}.git" "$pages"
+          if git -C "$pages" show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git -C "$pages" checkout --quiet -B gh-pages origin/gh-pages
+          else
+            git -C "$pages" checkout --quiet --orphan gh-pages
+            git -C "$pages" rm -rf --ignore-unmatch . >/dev/null 2>&1 || true
+          fi
+
+          safe="$REF_NAME"
+          safe="${safe//[^A-Za-z0-9_-]/-}"
+          safe="${safe#-}"
+          safe="${safe%-}"
+          if [ -z "$safe" ]; then safe="branch"; fi
+          if [ ${#safe} -gt 80 ]; then safe="${safe:0:80}"; fi
+
+          if [ "$REF_NAME" = "$DEFAULT_BRANCH" ]; then
+            target="."
+            url="${SERVER}/${REPO}/"
+          else
+            target="preview/${safe}"
+            url="${SERVER}/${REPO}/preview/${safe}/"
+          fi
+
+          if [ "$target" = "." ]; then
+            find "$pages" -mindepth 1 -maxdepth 1 ! -name .git ! -name preview -exec rm -rf {} +
+          else
+            rm -rf "$pages/preview/$safe"
+          fi
+
+          mkdir -p "$pages/$target"
+          cp "$site/index.html" "$pages/$target/index.html"
+          cp "$site/LICENSE" "$pages/$target/LICENSE"
+          cp "$site/README.md" "$pages/$target/README.md"
+          cp "$site/THIRD-PARTY-NOTICES.md" "$pages/$target/THIRD-PARTY-NOTICES.md"
+          cp -R "$site/music" "$pages/$target/music"
+          : > "$pages/.nojekyll"
+
+          if [ "$target" != "." ]; then
+            mkdir -p "$pages/preview"
+            index="$pages/preview/index.html"
+            {
+              echo '<!doctype html><meta charset="utf-8"><title>ChloeOS (ABYSS 360) previews</title>'
+              echo '<style>body{font:14px system-ui;background:#021526;color:#e0f2fe;padding:2rem}a{color:#7dd3fc}</style>'
+              echo '<h1>ChloeOS (ABYSS 360) previews</h1><ul>'
+              for d in "$pages"/preview/*/; do
+                [ -d "$d" ] || continue
+                name="$(basename "$d")"
+                echo "<li><a href=\"./${name}/\">${name}</a></li>"
+              done
+              echo '</ul>'
+            } > "$index"
+          fi
+
+          git -C "$pages" add -A
+          if git -C "$pages" diff --cached --quiet; then
+            echo "No gh-pages changes for ${REF_NAME}."
+          else
+            git -C "$pages" commit -m "Publish ${REF_NAME} preview"
+            git -C "$pages" push --quiet origin gh-pages
+          fi
+
+          {
+            echo "### ChloeOS (ABYSS 360) preview"
+            echo "URL: ${url}"
+          } >> "$GITHUB_STEP_SUMMARY"
